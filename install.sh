@@ -118,22 +118,22 @@ function install_nvim {
 #nvim
 function install_bashrc {
   if [[ -f "$HOME/.bashrc" ]]; then
-    echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}".bashrc-backup"${NORMAL} com as configurações antigas."
+    echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}.bashrc-backup${NORMAL} com as configurações antigas."
     if [[ -e "$HOME/.bashrc-backup" ]]; then
-      echo -e "Já existe um backup em $CONFIG_PATH/.bashrc-backup"
+      echo -e "Já existe um backup em $HOME/.bashrc-backup"
       exit 1
     fi
 
-    mv "$HOME/.bashrc" "$home/bashrc-backup" && echo -e "Backup criado!" 
+    mv "$HOME/.bashrc" "$HOME/.bashrc-backup" && echo -e "Backup criado!" 
     stow -v --target="$HOME" bash && echo -e "Configuração instalada com sucesso!"
   else 
     stow -v --target="$HOME" bash && echo -e "Configuração instalada com sucesso!"
   fi 
 }
 
+
+
 #Menu CLI
-
-
 printf "\n"
 
 printf "Escolha as configurações a serem instaladas:\n\n"
