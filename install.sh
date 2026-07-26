@@ -116,29 +116,49 @@ function install_nvim {
   fi 
 }
 
-#nvim
+#bashrc & blerc
 function install_bashrc {
+  if [[ -e "$HOME/.bashrc-backup" ]]; then
+    echo -e "Já existe um backup em $HOME/.bashrc-backup"
+    echo -e "${RED}Abortando...${NORMAL}"
+    return 1
+  fi
+
+  if type -t ble.sh &>/dev/null; then
+    echo -e "ble.sh está instalado e ativo!"
+  else
+    if [[ $THIS_OS_TYPE == "arch" ]]; then
+      $PKG_MANAGER blesh-git
+    else 
+      $PKG_MANAGER blesh
+    fi
+  fi
+
+  if [[ -e "$HOME/.blerc-backup" ]]; then
+    echo -e "Já existe um backup em $HOME/.blerc-backup"
+    echo -e "${RED}Abortando...${NORMAL}"
+    return 1
+  fi
+
+  #verifica se existe .bashrc, caso exista cria um backup
   if [[ -f "$HOME/.bashrc" ]]; then
     echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}.bashrc-backup${NORMAL} com as configurações antigas."
-    if [[ -e "$HOME/.bashrc-backup" ]]; then
-      echo -e "Já existe um backup em $HOME/.bashrc-backup"
-      echo -e "${RED}Abortando...${NORMAL}"
-      exit 1
-    fi
-    if [[ -f "$HOME/.blerc" ]]; then
-      echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}.blerc-backup${NORMAL} com as configurações antigas."
-      if [[ -e "$HOME/.blerc-backup" ]]; then
-        echo -e "Já existe um backup em $HOME/.blerc-backup"
-        echo -e "${RED}Abortando...${NORMAL}"
-        exit 1
-      fi
-    fi
+
     mv "$HOME/.bashrc" "$HOME/.bashrc-backup" && echo -e "Backup criado!" 
+  fi
+
+  #mesma coisa mas com blerc
+  if [[ -f "$HOME/.blerc" ]]; then
+    echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}.blerc-backup${NORMAL} com as configurações antigas."
     mv "$HOME/.blerc" "$HOME/.blerc-backup" && echo -e "Backup criado!" 
-    stow -v --target="$HOME" bash && echo -e "Configuração instalada com sucesso!"
-  else 
-    stow -v --target="$HOME" bash && echo -e "Configuração instalada com sucesso!"
-  fi 
+  fi
+
+  if stow -v --target="$HOME" bash; then
+    echo -e "Configuração instalada com sucesso!"
+  else
+    echo -e "${RED}Erro: Falha ao executar o GNU Stow.${NORMAL}"
+    return 1
+  fi
 }
 
 
