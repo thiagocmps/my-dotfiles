@@ -82,7 +82,7 @@ fi
 #Instalacao do nvim
 if ! command -v nvim &> /dev/null; then
   echo -e "Neovim não foi encontrado, instalando..."
-# compilar neovim do repositorio oficial, em desenvolvimento
+  # compilar neovim do repositorio oficial, em desenvolvimento
 
   if  [[ $THIS_OS_TYPE =~ ^debian  || $THIS_OS_TYPE =~ ^fedora  ]] then  
     echo -e  "Sistema $THIS_OS_TYPE detectado. Compilando Nvim do repositório oficial..."
@@ -91,7 +91,7 @@ if ! command -v nvim &> /dev/null; then
 
     # 2. Baixa, compila e instala o Neovim estável em uma única linha de comandos encadeados
     rm -rf /tmp/neovim && git clone -b stable --single-branch https://github.com/neovim/neovim.git /tmp/neovim && cd /tmp/neovim && make CMAKE_BUILD_TYPE=Release && sudo make install
-PKG_MANAGER  else
+    PKG_MANAGER  else
     $PKG_MANAGER nvim
   fi   
   $PKG_MANAGER nvim
@@ -105,6 +105,7 @@ function install_nvim {
 
     if [[ -e "$CONFIG_PATH/nvim-backup" ]]; then
       echo -e "Já existe um backup em $CONFIG_PATH/nvim-backup"
+      echo -e "${RED}Abortando...${NORMAL}"
       exit 1
     fi
 
@@ -121,9 +122,17 @@ function install_bashrc {
     echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}.bashrc-backup${NORMAL} com as configurações antigas."
     if [[ -e "$HOME/.bashrc-backup" ]]; then
       echo -e "Já existe um backup em $HOME/.bashrc-backup"
+      echo -e "${RED}Abortando...${NORMAL}"
       exit 1
     fi
-
+    if [[ -f "$HOME/.blerc" ]]; then
+      echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}.blerc-backup${NORMAL} com as configurações antigas."
+      if [[ -e "$HOME/.blerc-backup" ]]; then
+        echo -e "Já existe um backup em $HOME/.blerc-backup"
+        echo -e "${RED}Abortando...${NORMAL}"
+        exit 1
+      fi
+    fi
     mv "$HOME/.bashrc" "$HOME/.bashrc-backup" && echo -e "Backup criado!" 
     stow -v --target="$HOME" bash && echo -e "Configuração instalada com sucesso!"
   else 
