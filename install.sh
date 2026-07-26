@@ -134,6 +134,7 @@ function install_bashrc {
       fi
     fi
     mv "$HOME/.bashrc" "$HOME/.bashrc-backup" && echo -e "Backup criado!" 
+    mv "$HOME/.blerc" "$HOME/.blerc-backup" && echo -e "Backup criado!" 
     stow -v --target="$HOME" bash && echo -e "Configuração instalada com sucesso!"
   else 
     stow -v --target="$HOME" bash && echo -e "Configuração instalada com sucesso!"
