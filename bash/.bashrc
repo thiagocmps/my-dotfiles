@@ -33,10 +33,23 @@ alias ls='ls -F -A --color=auto'
 alias cls='clear'
 alias syncthing-cort='ssh -L 8385:localhost:8384 cortana'
 alias cat='bat'
-alias ..='cd ..'
 alias ips='ip a | rg inet '
 alias ports='sudo netstat -tulanp'
 alias vim='nvim'
+alias vim.='nvim .'
+
+# navegation with cd
+alias ..='cd ..'
+alias ...='cd ../../'
+alias .3='cd ../../../'
+alias .4='cd ../../../../'
+alias .5='cd ../../../../../'
+
+#EXPERIMENTOS
+#alias ...='OLD_PWD=$PWD && cd ../../ && echo "$OLD_PWD -> $PWD"'
+#alias .3='OLD_PWD=$PWD && cd ../../../ && echo "$OLD_PWD -> $PWD"'
+#alias .4='OLD_PWD=$PWD && cd ../../../../ && echo "$OLD_PWD -> $PWD"'
+#alias .5='OLD_PWD=$PWD && cd ../../../../../ && echo "$OLD_PWD -> $PWD"'
 
 #pacman and yay (remove that if you dont use arch (btw))
 alias cleanup='if [ -n "$(pacman -Qtdq)" ]; then sudo pacman -Rns $(pacman -Qtdq); else echo "Nenhum pacote órfão para remover."; fi && sudo paccache -r'
