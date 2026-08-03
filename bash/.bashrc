@@ -9,6 +9,7 @@
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.local/share/npm-global/bin:$PATH"
 export PATH="$HOME/go/bin:$PATH"
+export EDITOR=nvim
 
 RANGER_LOAD_DEFAULT_R=false #evita que ranger sobreponha o .config local com o global
 
@@ -37,6 +38,11 @@ alias ips='ip a | rg inet '
 alias ports='sudo netstat -tulanp'
 alias vim='nvim'
 alias vim.='nvim .'
+
+#vms and ssh
+alias debianvm='cd ~/vms/debian && quickemu --vm debian-13.6.0-netinst.conf'
+#alias debianvm='cd ~/vms/debian && quickemu --vm debian-13.6.0-netinst.conf | sleep 20 && ssh -v thiago@localhost -p 22220'
+alias debianvm-kill='cd ~/vms/debian && quickemu --vm debian-13.6.0-netinst.conf --kill'
 
 # navegation with cd
 alias ..='cd ..'
