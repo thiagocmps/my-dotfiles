@@ -15,10 +15,12 @@ return {
 			dashboard.button("e", "  New file", ":ene <BAR> startinsert <CR>"),
 			dashboard.button("q", "󰅚  Quit NVIM", ":qa<CR>"),
 		}
-		local handle = io.popen("fortune")
-		local fortune = handle:read("*a")
-		handle:close()
-		dashboard.section.footer.val = fortune
+		if vim.fn.executable("fortune") == 1 then
+			local handle = io.popen("fortune")
+			local fortune = handle:read("*a")
+			handle:close()
+			dashboard.section.footer.val = fortune
+		end
 
 		dashboard.config.opts.noautocmd = true
 

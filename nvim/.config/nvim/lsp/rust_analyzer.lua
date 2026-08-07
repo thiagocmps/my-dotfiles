@@ -5,8 +5,8 @@ return {
 	single_file_support = true,
 	settings = {
 		["rust-analyzer"] = {
-			diagnostics = {
-				enable = false,
+			files = {
+				excludeDirs = { ".stfolder", ".stversions" },
 			},
 		},
 	},

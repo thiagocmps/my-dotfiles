@@ -49,12 +49,23 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
 		end
 
-		-- Format on save
-		vim.api.nvim_create_autocmd("BufWritePre", {
-			buffer = bufnr,
-			callback = function()
-				vim.lsp.buf.format({ async = false })
-			end,
-		})
+		-- Completion nativa (Neovim 0.12)
+		if client:supports_method("textDocument/completion") then
+			vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
+		end
+
+		-- Server management
+		map("<leader>lr", function()
+			vim.cmd("lsp restart")
+		end, "Restart Server")
+		map("<leader>lq", function()
+			vim.cmd("edit " .. vim.fs.normalize(vim.lsp.get_log_path()))
+		end, "Open LSP Log")
+
+		-- Inlay hints toggle
+		map("<leader>uh", function()
+			local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr })
+			vim.lsp.inlay_hint.enable(not enabled, { bufnr = bufnr })
+		end, "Toggle Inlay Hints")
 	end,
 })
