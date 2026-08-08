@@ -22,9 +22,9 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
 -- Setup lazy.nvim
-
 require("vim-options")
-require("lsp-utils")
+require("config.keymaps")
+require("config.sessions")
 require("lazy").setup("plugins")
 vim.cmd.colorscheme("flux")
 vim.lsp.enable({ "ts_ls", "lua_ls", "bashls", "rust_analyzer" })

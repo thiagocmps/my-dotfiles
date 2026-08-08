@@ -148,6 +148,5 @@ return {
 				enabled = false,
 			},
 		})
-		vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<CR>")
 	end,
 }
