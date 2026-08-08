@@ -93,7 +93,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		end, "Quick Fix")
 
 		-- Diagnósticos
-		bmap("<leader>d", vim.diagnostic.open_float, "Line Diagnostics")
+		bmap("<leader>dd", vim.diagnostic.open_float, "Line Diagnostics")
 		bmap("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
 		bmap("]d", vim.diagnostic.goto_next, "Next Diagnostic")
 		bmap("<leader>dl", vim.diagnostic.setloclist, "Diagnostics to Loclist")
