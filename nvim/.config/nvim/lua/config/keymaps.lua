@@ -14,9 +14,7 @@ map("j", [[v:count > 5 ? "m'" . v:count . "j" : "j"]], "Jumplist down", "n", { e
 map("<Leader>i", "gg=G<C-o>", "Indentar arquivo inteiro")
 
 -- File explorer
-map("<leader>e", function()
-	require("neo-tree.command").toggle()
-end, "Toggle file explorer")
+map("<leader>e", "<cmd>Neotree toggle<CR>", "Toggle file explorer")
 
 -- Telescope (carrega o plugin sob demanda)
 local pick = function(name)

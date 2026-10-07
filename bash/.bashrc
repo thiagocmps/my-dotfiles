@@ -38,12 +38,15 @@ alias ips='ip a | rg inet '
 alias ports='sudo netstat -tulanp'
 alias vim='nvim'
 alias vim.='nvim .'
-
+alias opencode='opencode -c'
 #vms and ssh
+
 alias debianvm='cd ~/vms/debian && quickemu --vm debian-13.6.0-netinst.conf'
-#alias debianvm='cd ~/vms/debian && quickemu --vm debian-13.6.0-netinst.conf | sleep 20 && ssh -v thiago@localhost -p 22220'
 alias debianvm-kill='cd ~/vms/debian && quickemu --vm debian-13.6.0-netinst.conf --kill'
 
+alias nixvm='cd ~/vms/nixOS && quickemu --vm nixos-26.05-graphical.conf'
+alias nix-kill='cd ~/vms/nixOS && quickemu --vm nixos-26.05-graphical.conf --kill'
+ 
 # navegation with cd
 alias ..='cd ..'
 alias ...='cd ../../'
@@ -69,3 +72,6 @@ alias pacs='sudo pacman -S'
 alias cortana-jellyfin-reset='ssh -t cortana "cd /dockers/jellyfin/ && docker compose down && docker compose up -d"'
 
 [[ ${BLE_VERSION-} ]] && ble-attach #blesh-git 
+
+#change the background color to black
+printf  "\033]11;#000000\033\\"
