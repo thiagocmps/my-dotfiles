@@ -36,11 +36,84 @@ map("<leader>gf", function()
 	require("conform").format({ async = true, lsp_format = "fallback" })
 end, "Format buffer")
 
--- Live server
+-- Live server (estilo VS Code Live Server):
+--   - serve a raiz do projeto do arquivo (caminhos absolutos tipo /src/... funcionam)
+--   - abre o navegador no arquivo do buffer atual (relativo à raiz)
+--   - reaproveita o servidor quando é o mesmo projeto e reancora ao trocar
+-- Guarda a raiz/porta do servidor rodando para reaproveitar ou parar antes de subir.
+local ls_group = vim.api.nvim_create_augroup("UserLiveServer", { clear = true })
+local ls_root
+local ls_port
+vim.api.nvim_create_autocmd("User", {
+	group = ls_group,
+	pattern = "LiveServerStarted",
+	callback = function(ev)
+		ls_root = ev.data.root
+		ls_port = ev.data.port
+	end,
+})
+vim.api.nvim_create_autocmd("User", {
+	group = ls_group,
+	pattern = "LiveServerStopped",
+	callback = function(ev)
+		if ls_root == ev.data.root then
+			ls_root = nil
+			ls_port = nil
+		end
+	end,
+})
+
+-- Sobe a partir do arquivo até achar a raiz do projeto (marcadores comuns).
+local function project_root(file)
+	local dir = vim.fn.fnamemodify(file, ":p:h")
+	local home = vim.fn.expand("~")
+	local markers = { "index.html", "package.json", ".git" }
+	local cur = dir
+	while cur and cur ~= "/" and cur ~= home do
+		for _, marker in ipairs(markers) do
+			if vim.uv.fs_stat(cur .. "/" .. marker) then
+				return cur
+			end
+		end
+		local parent = vim.fn.fnamemodify(cur, ":h")
+		if parent == cur then
+			break
+		end
+		cur = parent
+	end
+	return dir
+end
+
 map("<leader>ls", function()
-	require("lazy").load({ plugins = { "live-server.nvim" } })
-	vim.cmd("LiveServerToggle")
-end, "Toggle Live Server")
+	local file = vim.api.nvim_buf_get_name(0)
+	if file == "" or vim.bo.buftype ~= "" or not vim.uv.fs_stat(file) then
+		return
+	end
+	file = vim.fn.fnamemodify(file, ":p")
+	local root = project_root(file)
+	local root_real = vim.uv.fs_realpath(root) or root
+	local rel = file:sub(#root + 2)
+
+	if ls_root then
+		if ls_root == root_real and ls_port then
+			-- Mesmo projeto: só abre o arquivo no navegador, sem reiniciar.
+			vim.ui.open(("http://127.0.0.1:%d/%s"):format(ls_port, rel))
+			return
+		end
+		vim.cmd("LiveServerStop " .. vim.fn.fnameescape(ls_root))
+	end
+
+	-- Abre o navegador no arquivo assim que o servidor subir.
+	vim.api.nvim_create_autocmd("User", {
+		group = ls_group,
+		pattern = "LiveServerStarted",
+		once = true,
+		callback = function(ev)
+			vim.ui.open(("http://127.0.0.1:%d/%s"):format(ev.data.port, rel))
+		end,
+	})
+	vim.cmd("LiveServerStart " .. vim.fn.fnameescape(root))
+end, "Live Server (abre o arquivo atual)")
 
 -- Sessões
 map("<leader>ss", function()
