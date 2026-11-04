@@ -148,7 +148,7 @@ local highlights = {
 	},
 
 	String = {
-		fg = c.grass,
+		fg = c.danger,
 	},
 
 	Character = {

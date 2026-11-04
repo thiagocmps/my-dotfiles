@@ -11,7 +11,7 @@ NORMAL="\e[0m"
 
 set -e
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 #menu verificação do sistema operacional
 #verifica o sistema operativo e define seu respectivo package manager
@@ -22,22 +22,22 @@ if [[ "$OSTYPE" =~ ^linux ]]; then
     case "$ID" in
       ubuntu|debian)
         echo -e "Sistema ${BOLD}Debian${NORMAL} detectado ($ID)"
-        PKG_MANAGER="sudo apt install"
+        PKG_MANAGER="sudo apt install -y"
         THIS_OS_TYPE="debian"
         ;;
       fedora|rhel|centos)
         echo -e "Sistema ${BOLD}RedHat${NORMAL} detectado ($ID)"
-        PKG_MANAGER="sudo dnf install"  
+        PKG_MANAGER="sudo dnf install -y"  
         THIS_OS_TYPE="fedora"
         ;;
       alpine)
         echo -e "Sistema ${BOLD}Alpine Linux${NORMAL} detectado"
-        PKG_MANAGER="apk add"
+        PKG_MANAGER="apk add -y"
         THIS_OS_TYPE="alpine"
         ;;
       arch)
         echo -e "Sistema ${BOLD}Arch Linux${NORMAL} detectado"
-        PKG_MANAGER="sudo pacman -S"
+        PKG_MANAGER="sudo pacman -S --noconfirm"
         THIS_OS_TYPE="arch"
         ;;
       *)
@@ -49,13 +49,14 @@ if [[ "$OSTYPE" =~ ^linux ]]; then
   else
     echo -e "Arquivo /etc/os-release não encontrado. Sistema muito antigo?"
     echo -e "${BOLD}${RED}Abortado${NC}${NORMAL}"
+    exit 1
   fi
   #id do MacOS
 elif [[ "$OSTYPE" =~ ^darwin ]] then
   echo -e  "Está a usar ${BOLD}MacOS${NORMAL}"
   PKG_MANAGER="brew install"
 elif  [[ "$OSTYPE" =~ ^msys ||  "$OSTYPE" =~ ^cygwin  ]] then
-  echo -e "${RED}Script não continuará, sistema Windows detectado.${RC}"
+  echo -e "${RED}Script não continuará, sistema Windows detectado.${NC}"
 fi
 
 #Menu instalacao do stow 
@@ -65,14 +66,20 @@ if ! command -v stow -v >/dev/null 2>&1; then
   read  -r  -p "(Y/n): " STOW_INPUT 
   case "$STOW_INPUT" in
     Y|y|s|S) 
+      if [ -z "$PKG_MANAGER" ]; then
+        echo -e "${RED}Nenhum gerenciador de pacotes detectado. Instale o GNU Stow manualmente e rode de novo.${NC}"
+        exit 1
+      fi
       echo -e "${BOLD}Instalando stow${NORMAL}"
       $PKG_MANAGER stow
-      break
       ;;    
     N|n) 
       echo -e "Stow não será instalado, saindo do script..."
       exit
-      break
+      ;;
+    *)
+      echo -e "${RED}Opção inválida, saindo do script...${NC}"
+      exit 1
       ;;
   esac
 else
@@ -84,23 +91,21 @@ if ! command -v nvim &> /dev/null; then
   echo -e "Neovim não foi encontrado, instalando..."
   # compilar neovim do repositorio oficial, em desenvolvimento
 
-  if  [[ $THIS_OS_TYPE =~ ^debian  || $THIS_OS_TYPE =~ ^fedora  ]] then  
+  if  [[ $THIS_OS_TYPE =~ ^debian ]]; then  
     echo -e  "Sistema $THIS_OS_TYPE detectado. Compilando Nvim do repositório oficial..."
-    # 1. Instala as dependências usando a sua variável (funciona para Debian e Fedora)
     $PKG_MANAGER ninja-build cmake gcc g++ make unzip gettext curl git
 
-    # 2. Baixa, compila e instala o Neovim estável em uma única linha de comandos encadeados
-    rm -rf /tmp/neovim && git clone -b stable --single-branch https://github.com/neovim/neovim.git /tmp/neovim && cd /tmp/neovim && make CMAKE_BUILD_TYPE=Release && sudo make install
-    PKG_MANAGER  else
+    rm -rf /tmp/neovim && git clone -b stable --single-branch https://github.com/neovim/neovim.git /tmp/neovim && ( cd /tmp/neovim && make CMAKE_BUILD_TYPE=Release && sudo make install )
+  else
     $PKG_MANAGER nvim
-  fi   
-  $PKG_MANAGER nvim
+  fi
 fi
 
 #Funções principais
 #nvim
 function install_nvim {
-  if [[ -d "$CONFIG_PATH/nvim" ]]; then
+  # Symlink é do próprio stow (o restow resolve); só faz backup de diretório real
+  if [[ -d "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -d "$CONFIG_PATH/nvim" && ! -L "$CONFIG_PATH/nvim" ]]; then
     echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}"nvim-backup"${NORMAL} com as configurações antigas."
 
     if [[ -e "$CONFIG_PATH/nvim-backup" ]]; then
@@ -110,10 +115,9 @@ function install_nvim {
     fi
 
     mv "$CONFIG_PATH/nvim" "$CONFIG_PATH/nvim-backup" && echo -e "Backup criado!" 
-    stow -v --target="$HOME" nvim && echo -e "${GREEN}Configuração instalada com sucesso!${NC}"
-  else 
-    stow -v --target="$HOME" nvim && echo -e "${GREEN}Configuração instalada com sucesso!${NC}"
-  fi 
+  fi
+
+  stow -v --restow --target="$HOME" nvim && echo -e "${GREEN}Configuração instalada com sucesso!${NC}"
 }
 
 #bashrc & blerc
@@ -124,14 +128,19 @@ function install_bashrc {
     return 1
   fi
 
-  if type -t ble.sh &>/dev/null; then
+  if [[ -f /usr/share/blesh/ble.sh ]]; then
     echo -e "ble.sh está instalado e ativo!"
-  else
-    if [[ $THIS_OS_TYPE == "arch" ]]; then
-      $PKG_MANAGER blesh-git
-    else 
-      $PKG_MANAGER blesh
+  elif [[ $THIS_OS_TYPE == "arch" ]]; then
+    if command -v yay &>/dev/null; then
+      yay -S --noconfirm blesh-git
+    elif command -v paru &>/dev/null; then
+      paru -S --noconfirm blesh-git
+    else
+      echo -e "${RED}ble.sh não está instalado. Instale 'blesh-git' pelo AUR e rode de novo.${NC}"
+      return 1
     fi
+  else
+    $PKG_MANAGER blesh
   fi
 
   if [[ -e "$HOME/.blerc-backup" ]]; then
@@ -153,7 +162,7 @@ function install_bashrc {
     mv "$HOME/.blerc" "$HOME/.blerc-backup" && echo -e "Backup criado!" 
   fi
 
-  if stow -v --target="$HOME" bash; then
+  if stow -v --restow --target="$HOME" bash; then
     echo -e "Configuração instalada com sucesso!"
   else
     echo -e "${RED}Erro: Falha ao executar o GNU Stow.${NORMAL}"
@@ -181,7 +190,7 @@ printf "\n"
 printf "${GREY}É necessário ter o nvim na última versão para as configurações funcionarem sem problemas. Leia a documentação no Github para mais detalhes.${NC}"
 while true; do
   printf "\n"
-  read -r -p ">: " INPUT
+  read -r -p ">: " INPUT || exit 1
 
   case "$INPUT" in
     0) 
@@ -191,7 +200,7 @@ while true; do
       ;;  
     1)
       echo -e "Instalando neovim..."
-      install_nvim && echo -e "${GREEN}"
+      install_nvim
       break
       ;;  
     2)
@@ -201,9 +210,6 @@ while true; do
       ;;
     *) 
       echo -e "${RED}Opção Inválida.${NC}"
-      break
       ;;  
   esac
 done
-
-return 0

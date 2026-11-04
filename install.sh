@@ -16,28 +16,28 @@ printf "0 - dotfiles\n"
 printf "1 - Syncthing\n"
 printf "2 - Ambos\n"
 printf "\n"
-read -r -p ">: " INPUT
 
 while true; do
+  read -r -p ">: " INPUT || exit 1
+
   case "$INPUT" in
     0)
       echo "Chamando instalador..."
-      source scripts/dotfiles-stow.sh
+      bash scripts/dotfiles-stow.sh || exit 1
       break
       ;;
     1)
       echo "Chamando instalador..."
-      source scripts/syncthing.sh
+      bash scripts/syncthing.sh || exit 1
       break
       ;;
     2)
       echo "Chamando instaladores..."
-      source scripts/dotfiles-stow.sh && source scripts/syncthing.sh
+      bash scripts/dotfiles-stow.sh && bash scripts/syncthing.sh || exit 1
       break
       ;;
     *)
       echo "Input inválido"
-      break
       ;;
   esac
 
