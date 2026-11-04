@@ -38,6 +38,7 @@ alias ips='ip a | rg inet '
 alias ports='sudo netstat -tulanp'
 alias vim='nvim'
 alias vim.='nvim .'
+alias v.='nvim .'
 alias opencode='opencode -c'
 #vms and ssh
 
@@ -47,7 +48,7 @@ alias debianvm-kill='cd ~/vms/debian && quickemu --vm debian-13.6.0-netinst.conf
 alias nixvm='cd ~/vms/nixOS && quickemu --vm nixos-26.05-graphical.conf'
 alias nix-kill='cd ~/vms/nixOS && quickemu --vm nixos-26.05-graphical.conf --kill'
  
-# navegation with cd
+# navigation with cd
 alias ..='cd ..'
 alias ...='cd ../../'
 alias .3='cd ../../../'
@@ -75,3 +76,5 @@ alias cortana-jellyfin-reset='ssh -t cortana "cd /dockers/jellyfin/ && docker co
 
 #change the background color to black
 printf  "\033]11;#000000\033\\"
+
+. "$HOME/.local/bin/env"
