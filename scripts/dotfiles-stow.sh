@@ -205,3 +205,5 @@ while true; do
       ;;  
   esac
 done
+
+return 0

@@ -5,14 +5,26 @@ return {
 		local dashboard = require("alpha.themes.dashboard")
 		local sessions = require("config.sessions")
 
-		dashboard.section.header.val = {
-			[[                               __                ]],
-			[[  ___     ___    ___   __  __ /\_\    ___ ___    ]],
-			[[ / _ `\  / __`\ / __`\/\ \/\ \\/\ \  / __` __`\  ]],
-			[[/\ \/\ \/\  __//\ \_\ \ \ \_/ |\ \ \/\ \/\ \/\ \ ]],
-			[[\ \_\ \_\ \____\ \____/\ \___/  \ \_\ \_\ \_\ \_\]],
-			[[ \/_/\/_/\/____/\/___/  \/__/    \/_/\/_/\/_/\/_/]],
-		}
+		local header_path = vim.fn.stdpath("config") .. "/assets/alpha_header.txt"
+		local header = {}
+		local header_file = io.open(header_path, "r")
+		if header_file then
+			for line in header_file:lines() do
+				table.insert(header, line)
+			end
+			header_file:close()
+		end
+		if #header == 0 then
+			header = {
+				[[                               __                ]],
+				[[  ___     ___    ___   __  __ /\_\    ___ ___    ]],
+				[[ / _ `\  / __`\ / __`\/\ \/\ \\/\ \  / __` __`\  ]],
+				[[/\ \/\ \/\  __//\ \_\ \ \ \_/ |\ \ \/\ \/\ \/\ \ ]],
+				[[\ \_\ \_\ \____\ \____/\ \___/  \ \_\ \_\ \_\ \_\]],
+				[[ \/_/\/_/\/____/\/___/  \/__/    \/_/\/_/\/_/\/_/]],
+			}
+		end
+		dashboard.section.header.val = header
 		dashboard.section.buttons.val = {
 			dashboard.button("e", "  New file", ":ene <BAR> startinsert <CR>"),
 			dashboard.button("q", "  Quit NVIM", ":qa<CR>"),
@@ -83,9 +95,9 @@ return {
 		}
 
 		dashboard.config.layout = {
-			{ type = "padding", val = 2 },
+			{ type = "padding", val = 1 },
 			dashboard.section.header,
-			{ type = "padding", val = 2 },
+			{ type = "padding", val = 1 },
 			dashboard.section.buttons,
 			{ type = "padding", val = 1 },
 			dashboard.section.sessions,

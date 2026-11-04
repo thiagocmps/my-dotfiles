@@ -25,6 +25,8 @@ vim.g.maplocalleader = "\\"
 require("vim-options")
 require("config.keymaps")
 require("config.sessions")
+require("config.templates")
+require("config.statusline")
 require("lazy").setup("plugins")
 vim.cmd.colorscheme("flux")
 vim.lsp.enable({ "ts_ls", "lua_ls", "bashls", "rust_analyzer" })
