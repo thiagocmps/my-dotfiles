@@ -38,7 +38,7 @@ case "${OS}" in
             ;;
           alpine)
             echo "Estás a usar Alpine Linux"
-            PKG_MANAGER="apk add"
+            PKG_MANAGER="apk add -y"
             THIS_OS_TYPE="alpine"
             echo "$PKG_MANAGER"
             ;;
@@ -83,12 +83,16 @@ case "${OS}" in
     ;;
 esac
 
-if ! command -v syncthing; then
+if ! command -v syncthing &>/dev/null; then
+  if [ -z "$PKG_MANAGER" ]; then
+    echo "Erro: gerenciador de pacotes não detectado. Instale o Syncthing manualmente."
+    exit 1
+  fi
   $PKG_MANAGER syncthing
 fi
 
 case "$THIS_OS_TYPE" in
-  ubuntu|fedora|arch)
+  debian|fedora|arch)
     echo "Ativando serviço via Systemd..."
     systemctl --user enable --now syncthing.service
     ;;
@@ -108,6 +112,19 @@ mkdir -p "$SYNC_PATH"
 
 # 3. Validar se o Syncthing já gerou o config.xml inicial
 if [ ! -f "$CONFIG_DIR/config.xml" ]; then
+  echo "Aguardando o Syncthing gerar o config.xml..."
+  for _ in {1..30}; do
+    [ -f "$CONFIG_DIR/config.xml" ] && break
+    sleep 1
+  done
+fi
+
+# Syncthing anterior à 1.27 usa ~/.config/syncthing
+if [ ! -f "$CONFIG_DIR/config.xml" ] && [ -f "$HOME/.config/syncthing/config.xml" ]; then
+  CONFIG_DIR="$HOME/.config/syncthing"
+fi
+
+if [ ! -f "$CONFIG_DIR/config.xml" ]; then
   echo "Erro: config.xml não encontrado. Inicie o Syncthing uma vez para gerar o arquivo base."
   exit 1
 fi
@@ -115,50 +132,50 @@ fi
 echo "Configurando a pasta no diretório: $CONFIG_DIR"
 
 # Pegar a API Key automaticamente do arquivo de configuração
-API_KEY=$(grep -oP '(?<=<apikey>)[^<]+' "$CONFIG_DIR/config.xml")
+API_KEY=$(sed -n 's/.*<apikey>\([^<]*\)<.*/\1/p' "$CONFIG_DIR/config.xml")
 
-echo "API KEY IS: $API_KEY"
+if [ -z "$API_KEY" ]; then
+  echo "Erro: não foi possível ler a API key de $CONFIG_DIR/config.xml"
+  exit 1
+fi
+
 # Adicionar a pasta via API enviando um JSON com o caminho correto detectado pelo script
+add_folder() {
+  curl -fsS -X POST -H "X-API-Key: $API_KEY" -H "Content-Type: application/json" -d '{
+    "id": "'"$1"'",
+    "label": "'"$2"'",
+    "path": "'"$3"'",
+    "type": "'"$4"'"
+  }' http://127.0.0.1:8384/rest/config/folders || echo "Falha ao adicionar a pasta $2."
+}
 
 #essa é a mais pesada, pra testes eu vou usar a do doom emacs
 
 
-echo "Deseja syncronizar 'cold-backup-dir'? (S/s|N/n)"
-read INPUT_BACKUP
+read -r -p "Deseja sincronizar 'cold-backup-dir'? (S/s|N/n): " INPUT_BACKUP
 
 if [[ "$INPUT_BACKUP" == "S" || "$INPUT_BACKUP" == "s" ]]; then
   echo "Sincronizando em cold-backup..."
-  curl -X POST -H "X-API-Key: $API_KEY" -d '{
-    "id": "'"$COLD_BACKUP_ID"'",
-    "label": "cold-backup-dir",
-    "path": "'"$SYNC_PATH"'/cold-backup",
-    "type": "send"
-  }' http://127.0.0.1:8384/rest/config/folders
+  add_folder "$COLD_BACKUP_ID" "cold-backup-dir" "$SYNC_PATH/cold-backup" "send"
 fi
 
-echo "Deseja sincronizar 'drawings-dir'? (S/s|N/n)"
-read INPUT_DRAWINGS
+read -r -p "Deseja sincronizar 'drawings-dir'? (S/s|N/n): " INPUT_DRAWINGS
 
-if [[ $INPUT_DRAWINGS == "S" || $INPUT_DRAWINGS == "s" ]]; then 
+if [[ "$INPUT_DRAWINGS" == "S" || "$INPUT_DRAWINGS" == "s" ]]; then 
   echo "Sincronizando em drawings..."
-  curl -X POST -H "X-API-Key: $API_KEY" -d '{
-    "id": "'"$DRAWINGS_ID"'",
-    "label": "drawings-dir",
-    "path": "'"$SYNC_PATH"'/drawings",
-    "type": "sendreceive"
-  }' http://127.0.0.1:8384/rest/config/folders
+  add_folder "$DRAWINGS_ID" "drawings-dir" "$SYNC_PATH/drawings" "sendreceive"
 fi
 
-curl -X POST -H "X-API-Key: $API_KEY" -d '{
-  "id": "'"$EMACS_ID"'",
-  "label": "emacs-dir",
-  "path": "'"$SYNC_PATH"'/doom-emacs",
-  "type": "sendreceive"
-}' http://127.0.0.1:8384/rest/config/folders
+read -r -p "Deseja sincronizar 'emacs-dir'? (S/s|N/n): " INPUT_EMACS
 
-curl -X POST -H "X-API-Key: $API_KEY" -d '{
-  "id": "'"$OBSIDIAN_ID"'",
-  "label": "obsidian-dir",
-  "path": "'"$SYNC_PATH"'/obsidian",
-  "type": "sendreceive"
-}' http://127.0.0.1:8384/rest/config/folders
+if [[ "$INPUT_EMACS" == "S" || "$INPUT_EMACS" == "s" ]]; then
+  echo "Sincronizando em emacs..."
+  add_folder "$EMACS_ID" "emacs-dir" "$SYNC_PATH/doom-emacs" "sendreceive"
+fi
+
+read -r -p "Deseja sincronizar 'obsidian-dir'? (S/s|N/n): " INPUT_OBSIDIAN
+
+if [[ "$INPUT_OBSIDIAN" == "S" || "$INPUT_OBSIDIAN" == "s" ]]; then
+  echo "Sincronizando em obsidian..."
+  add_folder "$OBSIDIAN_ID" "obsidian-dir" "$SYNC_PATH/obsidian" "sendreceive"
+fi
