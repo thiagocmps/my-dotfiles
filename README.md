@@ -21,7 +21,7 @@ Ela segue o modelo padrão de leitura de plugins em `.lua` com mais algumas muda
 
 - <span style="color: #EC5858;"> vermelho </span>: Vai sair do repositório em breve.
 - <span style="color: #B1C5E3;">Azul acinzentado</span>: Sem modificação.
-
+> Nota: eu colori as pastas indicando o que seria removido ou mantido, mas o github sanitizou tudo. depois eu corrijo isso, fiquei muito tempo colorindo pra poder simplesmente apagar tudo 😭
 <pre>
 <span style="color: #B1C5E3;"><b>
 <span style="font-size: 18px">nvim</span> 
@@ -64,7 +64,7 @@ Ela segue o modelo padrão de leitura de plugins em `.lua` com mais algumas muda
     └── skeleton.vue
 
 <u>8 directories, 30 files</u>
-</span>
+</b></span>
 </pre>
 
 #### Plugins Neovim
