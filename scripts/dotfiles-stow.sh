@@ -1,6 +1,5 @@
 #!/bin/bash
 CONFIG_PATH="$HOME/.config"
-
 export PATH="$HOME/.local/bin:$PATH"
 
 RED='\033[0;31m'
@@ -118,14 +117,13 @@ if ! command -v opencode &> /dev/null; then
 
   else  
     echo -e "Opencode não foi encontrado, baixando pelo seu gestor de pacotes '$PKG_MANAGER'..."  
-    $PKG_MANAGER opencode
+    $PKG_MANAGER opencode || true
   fi
 
-  if command -v opencode &>/dev/null; then
+  if [ -x "$HOME/.local/bin/opencode" ] || [ -x "$HOME/.opencode/bin/opencode" ] || command -v opencode &>/dev/null; then
     echo "Opencode instalado com sucesso!"
   else
-    echo "Erro ao instalar o Opencode."
-    exit 1
+    echo -e "${RED}Não foi possível instalar o Opencode, seguindo sem ele.${NC}"
   fi
 fi
 
