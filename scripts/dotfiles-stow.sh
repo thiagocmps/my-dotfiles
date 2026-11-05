@@ -101,10 +101,42 @@ if ! command -v nvim &> /dev/null; then
   fi
 fi
 
+#Instalacao do opencode 
+if ! command -v opencode &> /dev/null; then
+  echo -e "Opencode não foi encontrado, baixando pelo seu gestor de packotes '$PKG_MANAGER' ..." 
+  
+  XDG_BIN_DIR="$HOME/.local/bin" \
+        bash -c 'curl -fsSL https://opencode.ai/v2/install | bash'
+
+  if command -v opencode &>/dev/null; then
+    echo "Opencode instalado com sucesso!"
+  else
+    echo "Erro ao instalar o Opencode."
+    exit 1
+  fi
+fi
+
+function install_opencode {
+  # Symlink é do próprio stow (o restow resolve), só faz backup de diretório real
+  if [[ -d "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -d "$CONFIG_PATH/opencode" && ! -L "$CONFIG_PATH/opencode" ]]; then
+    echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}'opencode-backup'${NORMAL} com as configurações antigas."
+
+    if [[ -e "$CONFIG_PATH/opencode-backup" ]]; then
+      echo -e "Já existe um backup em $CONFIG_PATH/opencode-backup"
+      echo -e "${RED}Abortando...${NORMAL}"
+      exit 1
+    fi
+
+    mv "$CONFIG_PATH/opencode" "$CONFIG_PATH/opencode-backup" && echo -e "Backup criado!" 
+  fi
+
+  stow -v --restow --target="$HOME" opencode && echo -e "${GREEN}Configuração instalada com sucesso!${NC}"
+}
+
 #Funções principais
 #nvim
 function install_nvim {
-  # Symlink é do próprio stow (o restow resolve); só faz backup de diretório real
+  # Symlink é do próprio stow (o restow resolve), só faz backup de diretório real
   if [[ -d "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -d "$CONFIG_PATH/nvim" && ! -L "$CONFIG_PATH/nvim" ]]; then
     echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}"nvim-backup"${NORMAL} com as configurações antigas."
 
