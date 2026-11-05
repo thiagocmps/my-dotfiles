@@ -1,0 +1,113 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/qwen3.5:9b",
+  "plugins": [
+    {
+      "package": "./vendor/ponytail",
+      "options": {
+        "skipProviders": [
+          "ollama"
+        ],
+        "skipModels": [],
+        "skipAgents": []
+      }
+    },
+    "opencode-snip@latest"
+  ],
+  "providers": {
+    "openrouter": {
+      "models": {
+        "openrouter/free": {
+          "name": "OpenRouter Free (Auto)"
+        }
+      }
+    },
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama Local",
+      "options": {
+        "baseURL": "http://127.0.0.1:11434/v1"
+      },
+      "models": {
+        "qwen3.5:9b": {
+          "name": "Qwen3.5:9b Local",
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "top_k": 40,
+            "max_tokens": 1024,
+            "reasoning_effort": "none"
+          }
+        },
+        "bonsai-leve": {
+          "name": "bonsai-leve",
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "top_k": 40,
+            "reasoning_effort": "none"
+          }
+        },
+        "qwen2.5-coder:7b": {
+          "name": "Qwen2.5 Coder 7B Local",
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "top_k": 40,
+            "max_tokens": 2048
+          }
+        },
+        "deepseek-r1:7b": {
+          "name": "deepseek-r1:7b",
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "top_k": 40,
+            "reasoning_effort": "none"
+          }
+        }
+      }
+    }
+  },
+  "agents": {
+    "local": {
+      "description": "Modelo local do Ollama sem MCPs (prompt enxuto, respostas mais rápidas)",
+      "mode": "primary",
+      "model": "ollama/qwen2.5-coder:7b",
+      "permissions": [
+        { "action": "execute", "resource": "*", "effect": "deny" },
+        { "action": "read", "resource": "*", "effect": "deny" },
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "glob", "resource": "*", "effect": "deny" },
+        { "action": "grep", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" },
+        { "action": "webfetch", "resource": "*", "effect": "deny" },
+        { "action": "websearch", "resource": "*", "effect": "deny" },
+        { "action": "skill", "resource": "*", "effect": "deny" },
+        { "action": "subagent", "resource": "*", "effect": "deny" },
+        { "action": "question", "resource": "*", "effect": "deny" },
+        { "action": "wordcraft_*", "resource": "*", "effect": "deny" },
+        { "action": "drawio-hosted_*", "resource": "*", "effect": "deny" },
+        { "action": "opencode_list_mcp_resources", "resource": "*", "effect": "deny" },
+        { "action": "opencode_read_mcp_resource", "resource": "*", "effect": "deny" },
+        { "action": "*", "resource": "*", "effect": "deny" }
+      ]
+    }
+  },
+  "mcp": {
+    "servers": {
+      "wordcraft": {
+        "type": "local",
+        "command": [
+          "/home/thiago/.local/bin/wordcraft-cli",
+          "mcp"
+        ],
+        "enabled": true
+      },
+      "drawio-hosted": {
+        "type": "remote",
+        "url": "https://mcp.draw.io/mcp"
+      }
+    }
+  }
+}

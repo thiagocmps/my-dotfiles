@@ -1,5 +1,6 @@
 #!/bin/bash
 CONFIG_PATH="$HOME/.config"
+export PATH="$HOME/.local/bin:$PATH"
 
 RED='\033[0;31m'
 GREY='\033[90m'
@@ -92,19 +93,61 @@ if ! command -v nvim &> /dev/null; then
   # compilar neovim do repositorio oficial, em desenvolvimento
 
   if  [[ $THIS_OS_TYPE =~ ^debian ]]; then  
-    echo -e  "Sistema $THIS_OS_TYPE detectado. Compilando Nvim do repositório oficial..."
+    echo -e  "Sistema $THIS_OS_TYPE detectado. Compilando ${BOLD}NEOVIM${NORMAL} do repositório oficial..."
     $PKG_MANAGER ninja-build cmake gcc g++ make unzip gettext curl git
 
     rm -rf /tmp/neovim && git clone -b stable --single-branch https://github.com/neovim/neovim.git /tmp/neovim && ( cd /tmp/neovim && make CMAKE_BUILD_TYPE=Release && sudo make install )
   else
-    $PKG_MANAGER nvim
+    $PKG_MANAGER neovim
   fi
 fi
+
+#Instalacao do opencode 
+if ! command -v opencode &> /dev/null; then
+  if [[ $THIS_OS_TYPE =~ ^debian || $THIS_OS_TYPE =~ ^fedora ]]; then
+    if ! command -v curl &>/dev/null; then
+      echo -e "${BOLD}curl${NORMAL} não encontrado, instalando..."
+      $PKG_MANAGER curl
+    fi
+    echo -e  "Sistema $THIS_OS_TYPE detectado. baixando ${BOLD}Opencode${NORMAL} do script oficial....\nSite oficial: https://opencode.ai/v2/install"
+    bash -c 'curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path' && \
+      mkdir -p "$HOME/.local/bin" && \
+      mv "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode" && \
+      rmdir "$HOME/.opencode/bin" 2>/dev/null
+
+  else  
+    echo -e "Opencode não foi encontrado, baixando pelo seu gestor de pacotes '$PKG_MANAGER'..."  
+    $PKG_MANAGER opencode || true
+  fi
+
+  if [ -x "$HOME/.local/bin/opencode" ] || [ -x "$HOME/.opencode/bin/opencode" ] || command -v opencode &>/dev/null; then
+    echo "Opencode instalado com sucesso!"
+  else
+    echo -e "${RED}Não foi possível instalar o Opencode, seguindo sem ele.${NC}"
+  fi
+fi
+
+function install_opencode {
+  # Symlink é do próprio stow (o restow resolve), só faz backup de diretório real
+  if [[ -d "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -d "$CONFIG_PATH/opencode" && ! -L "$CONFIG_PATH/opencode" ]]; then
+    echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}'opencode-backup'${NORMAL} com as configurações antigas."
+
+    if [[ -e "$CONFIG_PATH/opencode-backup" ]]; then
+      echo -e "Já existe um backup em $CONFIG_PATH/opencode-backup"
+      echo -e "${RED}Abortando...${NORMAL}"
+      exit 1
+    fi
+
+    mv "$CONFIG_PATH/opencode" "$CONFIG_PATH/opencode-backup" && echo -e "Backup criado!" 
+  fi
+
+  stow -v --restow --target="$HOME" opencode && echo -e "${GREEN}Configuração instalada com sucesso!${NC}"
+}
 
 #Funções principais
 #nvim
 function install_nvim {
-  # Symlink é do próprio stow (o restow resolve); só faz backup de diretório real
+  # Symlink é do próprio stow (o restow resolve), só faz backup de diretório real
   if [[ -d "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -d "$CONFIG_PATH/nvim" && ! -L "$CONFIG_PATH/nvim" ]]; then
     echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}"nvim-backup"${NORMAL} com as configurações antigas."
 
@@ -178,12 +221,9 @@ printf "\n"
 printf "Escolha as configurações a serem instaladas:\n\n"
 
 printf "${BLUE}[0]${NC} Instalar todos\n"
-printf "${BLUE}[1]${NC} Neovim\n"
+printf "${BLUE}[1]${NC} nvim\n"
 printf "${BLUE}[2]${NC} .bashrc\n"
-
-#printf "\n"
-#printf '%*s\n' "$(tput cols)" '' | tr ' ' '='
-#printf "\n"
+printf "${BLUE}[3]${NC} opencode\n"
 
 printf "\n"
 
@@ -195,7 +235,7 @@ while true; do
   case "$INPUT" in
     0) 
       echo -e "${BOLD}Instalando tudo...${NC}"
-      install_nvim && install_bashrc && echo -e "Instalados com sucesso" 
+      install_nvim && install_bashrc && install_opencode && echo -e "Instalados com sucesso" 
       break
       ;;  
     1)
@@ -206,6 +246,11 @@ while true; do
     2)
       echo -e "${BOLD}Instalando .bashrc...${NC}"
       install_bashrc
+      break
+      ;;
+    3)
+      echo -e "${BOLD}Instalando opencode...${NC}"
+      install_opencode
       break
       ;;
     *) 
