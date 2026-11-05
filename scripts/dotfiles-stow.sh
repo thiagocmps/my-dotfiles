@@ -105,7 +105,7 @@ fi
 if ! command -v opencode &> /dev/null; then
   if [[ $THIS_OS_TYPE =~ ^debian || $THIS_OS_TYPE =~ ^fedora ]]; then
     echo -e  "Sistema $THIS_OS_TYPE detectado. baixando ${BOLD}Opencode${NORMAL} do script oficial....\nSite oficial: https://opencode.ai/v2/install"
-    bash -c 'curl -fsSL https://opencode.ai/v2/install | bash -s --no-modify-path' && \
+    bash -c 'curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path' && \
       mkdir -p "$HOME/.local/bin" && \
       mv "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode" && \
       rmdir "$HOME/.opencode/bin" 2>/dev/null
