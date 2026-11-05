@@ -92,21 +92,28 @@ if ! command -v nvim &> /dev/null; then
   # compilar neovim do repositorio oficial, em desenvolvimento
 
   if  [[ $THIS_OS_TYPE =~ ^debian ]]; then  
-    echo -e  "Sistema $THIS_OS_TYPE detectado. Compilando Nvim do repositório oficial..."
+    echo -e  "Sistema $THIS_OS_TYPE detectado. Compilando ${BOLD}NEOVIM${NORMAL} do repositório oficial..."
     $PKG_MANAGER ninja-build cmake gcc g++ make unzip gettext curl git
 
     rm -rf /tmp/neovim && git clone -b stable --single-branch https://github.com/neovim/neovim.git /tmp/neovim && ( cd /tmp/neovim && make CMAKE_BUILD_TYPE=Release && sudo make install )
   else
-    $PKG_MANAGER nvim
+    $PKG_MANAGER neovim
   fi
 fi
 
 #Instalacao do opencode 
 if ! command -v opencode &> /dev/null; then
-  echo -e "Opencode não foi encontrado, baixando pelo seu gestor de packotes '$PKG_MANAGER' ..." 
-  
-  XDG_BIN_DIR="$HOME/.local/bin" \
-        bash -c 'curl -fsSL https://opencode.ai/v2/install | bash'
+  if [[ $THIS_OS_TYPE =~ ^debian || $THIS_OS_TYPE =~ ^fedora ]]; then
+    echo -e  "Sistema $THIS_OS_TYPE detectado. baixando ${BOLD}Opencode${NORMAL} do script oficial....\nSite oficial: https://opencode.ai/v2/install"
+    bash -c 'curl -fsSL https://opencode.ai/v2/install | bash -s --no-modify-path' && \
+      mkdir -p "$HOME/.local/bin" && \
+      mv "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode" && \
+      rmdir "$HOME/.opencode/bin" 2>/dev/null
+
+  else  
+    echo -e "Opencode não foi encontrado, baixando pelo seu gestor de pacotes '$PKG_MANAGER'..."  
+    $PKG_MANAGER opencode
+  fi
 
   if command -v opencode &>/dev/null; then
     echo "Opencode instalado com sucesso!"
@@ -210,12 +217,9 @@ printf "\n"
 printf "Escolha as configurações a serem instaladas:\n\n"
 
 printf "${BLUE}[0]${NC} Instalar todos\n"
-printf "${BLUE}[1]${NC} Neovim\n"
+printf "${BLUE}[1]${NC} nvim\n"
 printf "${BLUE}[2]${NC} .bashrc\n"
-
-#printf "\n"
-#printf '%*s\n' "$(tput cols)" '' | tr ' ' '='
-#printf "\n"
+printf "${BLUE}[3]${NC} opencode\n"
 
 printf "\n"
 
@@ -227,7 +231,7 @@ while true; do
   case "$INPUT" in
     0) 
       echo -e "${BOLD}Instalando tudo...${NC}"
-      install_nvim && install_bashrc && echo -e "Instalados com sucesso" 
+      install_nvim && install_bashrc && install_opencode && echo -e "Instalados com sucesso" 
       break
       ;;  
     1)
@@ -238,6 +242,11 @@ while true; do
     2)
       echo -e "${BOLD}Instalando .bashrc...${NC}"
       install_bashrc
+      break
+      ;;
+    3)
+      echo -e "${BOLD}Instalando opencode...${NC}"
+      install_opencode
       break
       ;;
     *) 
