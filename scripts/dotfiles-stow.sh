@@ -1,6 +1,8 @@
 #!/bin/bash
 CONFIG_PATH="$HOME/.config"
 
+export PATH="$HOME/.local/bin:$PATH"
+
 RED='\033[0;31m'
 GREY='\033[90m'
 GREEN='\e[32m'
