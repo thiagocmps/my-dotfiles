@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-RED='\033[0;31m'
-GREY='\033[90m'
-GREEN='\e[32m'
-BLUE='\e[34m'
-NC='\033[0m' #sem cor, finaliza as cores
 BOLD="\e[1m"
 NORMAL="\e[0m"
 

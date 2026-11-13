@@ -33,7 +33,7 @@ if [[ "$OSTYPE" =~ ^linux ]]; then
         ;;
       alpine)
         echo -e "Sistema ${BOLD}Alpine Linux${NORMAL} detectado"
-        PKG_MANAGER="apk add -y"
+        PKG_MANAGER="apk add"
         THIS_OS_TYPE="alpine"
         ;;
       arch)
@@ -62,7 +62,7 @@ fi
 
 #Menu instalacao do stow 
 #caso nao tenha Stow instalado, instala com pkgmanager
-if ! command -v stow -v >/dev/null 2>&1; then
+if ! command -v stow >/dev/null 2>&1; then
   echo -e "${BOLD}GNU Stow${NORMAL} necessário para continuar, deseja instalar? (caso decidir que não, o script irá fechar, sem nenhuma alteração no sistema)\n"
   read  -r  -p "(Y/n): " STOW_INPUT 
   case "$STOW_INPUT" in
@@ -98,7 +98,20 @@ if ! command -v nvim &> /dev/null; then
 
     rm -rf /tmp/neovim && git clone -b stable --single-branch https://github.com/neovim/neovim.git /tmp/neovim && ( cd /tmp/neovim && make CMAKE_BUILD_TYPE=Release && sudo make install )
   else
-    $PKG_MANAGER neovim
+    if [ -z "$PKG_MANAGER" ]; then
+      echo -e "${RED}Gerenciador de pacotes não detectado, instale o neovim manualmente.${NC}"
+    else
+      $PKG_MANAGER neovim
+    fi
+  fi
+fi
+
+#instala alacrittyy
+if ! command -v alacritty &> /dev/null; then
+  if [ -z "$PKG_MANAGER" ]; then
+    echo -e "${RED}Gerenciador de pacotes não detectado, instale o alacritty manualmente.${NC}"
+  else
+    $PKG_MANAGER alacritty
   fi
 fi
 
@@ -127,6 +140,23 @@ if ! command -v opencode &> /dev/null; then
   fi
 fi
 
+function install_alacritty() {
+  # Symlink é do próprio stow (o restow resolve), só faz backup de diretório real
+  if [[ -d "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -d "$CONFIG_PATH/alacritty" && ! -L "$CONFIG_PATH/alacritty" ]]; then
+    echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}'alacritty-backup'${NORMAL} com as configurações antigas."
+
+    if [[ -e "$CONFIG_PATH/alacritty-backup" ]]; then
+      echo -e "Já existe um backup em $CONFIG_PATH/alacritty-backup"
+      echo -e "${RED}Abortando...${NORMAL}"
+      exit 1
+    fi
+
+    mv "$CONFIG_PATH/alacritty" "$CONFIG_PATH/alacritty-backup" && echo -e "Backup criado!" 
+  fi
+
+  stow -v --restow --target="$HOME" alacritty && echo -e "${GREEN}Configuração instalada com sucesso!${NC}"
+}
+
 function install_opencode {
   # Symlink é do próprio stow (o restow resolve), só faz backup de diretório real
   if [[ -d "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -d "$CONFIG_PATH/opencode" && ! -L "$CONFIG_PATH/opencode" ]]; then
@@ -149,7 +179,7 @@ function install_opencode {
 function install_nvim {
   # Symlink é do próprio stow (o restow resolve), só faz backup de diretório real
   if [[ -d "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -d "$CONFIG_PATH/nvim" && ! -L "$CONFIG_PATH/nvim" ]]; then
-    echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}"nvim-backup"${NORMAL} com as configurações antigas."
+    echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}nvim-backup${NORMAL} com as configurações antigas."
 
     if [[ -e "$CONFIG_PATH/nvim-backup" ]]; then
       echo -e "Já existe um backup em $CONFIG_PATH/nvim-backup"
@@ -197,6 +227,10 @@ function install_bashrc {
       return 1
     fi
   else
+    if [ -z "$PKG_MANAGER" ]; then
+      echo -e "${RED}ble.sh não está instalado. Instale 'blesh' manualmente e rode de novo.${NC}"
+      return 1
+    fi
     $PKG_MANAGER blesh
   fi
 
@@ -205,7 +239,7 @@ function install_bashrc {
     echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}.bashrc-backup${NORMAL} com as configurações antigas."
     mv "$HOME/.bashrc" "$HOME/.bashrc-backup" && echo -e "Backup criado!" 
   fi
-  
+
   # backup do .config/bash
   if [[ -f "$HOME/.config/bash" ]]; then
     echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}~/.config/bash-backup${NORMAL} com as configurações antigas."
@@ -235,18 +269,19 @@ printf "${BLUE}[0]${NC} Instalar todos\n"
 printf "${BLUE}[1]${NC} nvim\n"
 printf "${BLUE}[2]${NC} .bashrc\n"
 printf "${BLUE}[3]${NC} opencode\n"
+printf "${BLUE}[4]${NC} alacritty\n"
 
 printf "\n"
 
 printf "${GREY}É necessário ter o nvim na última versão para as configurações funcionarem sem problemas. Leia a documentação no Github para mais detalhes.${NC}"
+
 while true; do
   printf "\n"
   read -r -p ">: " INPUT || exit 1
-
-  case "$INPUT" in
+   case "$INPUT" in
     0) 
       echo -e "${BOLD}Instalando tudo...${NC}"
-      install_nvim && install_bashrc && install_opencode && echo -e "Instalados com sucesso" 
+      install_nvim && install_bashrc && install_alacritty && install_opencode && echo -e "Instalados com sucesso" 
       break
       ;;  
     1)
@@ -262,6 +297,11 @@ while true; do
     3)
       echo -e "${BOLD}Instalando opencode...${NC}"
       install_opencode
+      break
+      ;;
+    4)
+      echo -e "${BOLD}Instalando alacritty...${NC}"
+      install_alacritty
       break
       ;;
     *) 

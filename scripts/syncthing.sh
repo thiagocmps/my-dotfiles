@@ -38,7 +38,7 @@ case "${OS}" in
             ;;
           alpine)
             echo "Estás a usar Alpine Linux"
-            PKG_MANAGER="apk add -y"
+            PKG_MANAGER="apk add"
             THIS_OS_TYPE="alpine"
             echo "$PKG_MANAGER"
             ;;
@@ -94,7 +94,7 @@ fi
 case "$THIS_OS_TYPE" in
   debian|fedora|arch)
     echo "Ativando serviço via Systemd..."
-    systemctl --user enable --now syncthing.service
+    systemctl --user enable --now syncthing.service || echo "Falha ao ativar o serviço. Rode 'systemctl --user start syncthing' manualmente."
     ;;
   TERMUX)
     echo "Ativando serviço via Termux-Services..."
