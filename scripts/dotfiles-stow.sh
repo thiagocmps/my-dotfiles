@@ -165,12 +165,26 @@ function install_nvim {
 
 #bashrc & blerc
 function install_bashrc {
+  # verifica se existe backup, se tiver cancela aqui o script
   if [[ -e "$HOME/.bashrc-backup" ]]; then
     echo -e "Já existe um backup em $HOME/.bashrc-backup"
     echo -e "${RED}Abortando...${NORMAL}"
     return 1
   fi
 
+  if [[ -e "$HOME/.config/bash-backup" ]]; then
+    echo -e "Já existe um backup em $HOME/.config/bash-backup"
+    echo -e "${RED}Abortando...${NORMAL}"
+    return 1
+  fi
+
+  if [[ -e "$HOME/.blerc-backup" ]]; then
+    echo -e "Já existe um backup em $HOME/.blerc-backup"
+    echo -e "${RED}Abortando...${NORMAL}"
+    return 1
+  fi
+
+  # instala blesh caso não tenha
   if [[ -f /usr/share/blesh/ble.sh ]]; then
     echo -e "ble.sh está instalado e ativo!"
   elif [[ $THIS_OS_TYPE == "arch" ]]; then
@@ -186,17 +200,16 @@ function install_bashrc {
     $PKG_MANAGER blesh
   fi
 
-  if [[ -e "$HOME/.blerc-backup" ]]; then
-    echo -e "Já existe um backup em $HOME/.blerc-backup"
-    echo -e "${RED}Abortando...${NORMAL}"
-    return 1
-  fi
-
-  #verifica se existe .bashrc, caso exista cria um backup
+  # verifica se existe .bashrc, caso exista cria um backup
   if [[ -f "$HOME/.bashrc" ]]; then
     echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}.bashrc-backup${NORMAL} com as configurações antigas."
-
     mv "$HOME/.bashrc" "$HOME/.bashrc-backup" && echo -e "Backup criado!" 
+  fi
+  
+  # backup do .config/bash
+  if [[ -f "$HOME/.config/bash" ]]; then
+    echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}~/.config/bash-backup${NORMAL} com as configurações antigas."
+    mv "$HOME/.config/bash" "$HOME/.config/bash-backup" && echo -e "Backup criado!" 
   fi
 
   #mesma coisa mas com blerc
@@ -212,8 +225,6 @@ function install_bashrc {
     return 1
   fi
 }
-
-
 
 #Menu CLI
 printf "\n"
