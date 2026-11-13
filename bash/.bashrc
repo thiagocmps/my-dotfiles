@@ -17,11 +17,12 @@
 
 
 #style
-RED='\033[0;31m'
-BLUE='\e[34m' 
-NC='\033[0m' #sem cor, finaliza as cores
-BOLD="\e[1m"
-NORMAL="\e[0m"
+RED=$'\033[0;31m'
+BLUE=$'\e[34m' 
+GREY=$'\033[90m'
+NC=$'\033[0m' #sem cor, finaliza as cores
+BOLD=$'\e[1m'
+NORMAL=$'\e[0m'
 
 HARDWARES=("cortana" "rodney" "endurance")
 
@@ -83,6 +84,7 @@ lis() {
   # How it works: lis [ARG $1 = FILE or DIR to send] [ARG $2 = destiny (HARDWARE)]
   local ARGUMENT_TYPE=""
   local DESTINY="$2"
+  local INPUT=""
 
   # verifica se foi passado algum argumento
   if [[ -z "$1" ]]; then
@@ -99,14 +101,14 @@ lis() {
   if [[ -z "$DESTINY" ]]; then
     if [[ $HOSTNAME == "cortana" || $HOSTNAME == "rodney" ]]; then 
       DESTINY="endurance"
-      echo "sending to endurance..."
+      echo -e "Enviando para ${BLUE}Endurance${NC}..."
     else
       DESTINY="rodney"
-      echo "sending to rodney..."
+      echo -e "Enviando para ${BLUE}Rodney${NC}..."
     fi
   fi
 
-  if [[ ! " ${HARDWARES[*]} " =~ " $2 " && -n "$DESTINY" ]]; then
+  if [[ ! " ${HARDWARES[*]} " =~ " $DESTINY " && -n "$DESTINY" ]]; then
     echo -e "Opção inválida\nDestino '$2' não reconhecido."
     return 1
   fi
@@ -134,10 +136,10 @@ lis() {
       echo -e "Tem certeza que quer enviar para o ${BLUE}${DESTINY}${NC}?"
     fi
 
-
+    # loop para guardar INPUT 
     while true; do
-      read -r -p "(y/n):" SEND_INPUT
-      case $SEND_INPUT in
+      read -r -p "(y/n):" INPUT
+      case $INPUT in
         Y|y|Yes|yes|S|s|Sim|sim)
           break
           ;;
@@ -154,6 +156,7 @@ lis() {
 
   # continua aqui a lógica de enviar para o servidor. (usando o rsync por favor ne thiago)
   if rsync -avz --progress "$1" "$DESTINY:/home/thiago/ALIS/"; then
+    echo -e "\n"
     echo -e "Transferência concluída!\n${BLUE}$1${NC} --> ${BLUE}$DESTINY${NC}:~/ALIS"
   else
     echo -e "Erro durante a transferência.\nTem certeza que tem os hosts no ${BLUE}~/.ssh/config${NC}?"
@@ -161,8 +164,6 @@ lis() {
   fi
 }
 
-alias nixvm='cd ~/vms/nixOS && quickemu --vm nixos-26.05-graphical.conf'
-alias nix-kill='cd ~/vms/nixOS && quickemu --vm nixos-26.05-graphical.conf --kill'
 
 # navigation with cd
 alias ..='cd ..'
@@ -183,7 +184,38 @@ alias pacq='sudo pacman -Q --noconfirm'
 alias pacqinf='sudo pacman -Qil --noconfirm'
 alias pacsyu='sudo pacman -Syu && yay -Sua'
 alias pacsyyu='sudo pacman -Syyu'
-alias pacs='sudo pacman -S'
+# alias pacs='sudo pacman -S'
+# alias pacsi='sudo pacman -Si'
+
+pacs() {
+  #guarda o argumeto $1 como pacote a ser instalado
+  local PACKAGE="$1"
+  local INPUT=""
+
+  if [[ -z "$PACKAGE" ]]; then
+    echo -e "Por favor, escreva o nome do pacote que você quer instalar."
+    return 1
+  fi 
+
+  # verifica e imprime detalhes do pacote antes de instalar. 
+  sudo pacman -Ss "$PACKAGE"
+
+  echo -e "\nQual pacote deseja instalar?"
+  read -r -p "${GREY}(Vazio = ${PACKAGE})${NC}: " INPUT
+
+  if [[ -z "$INPUT" ]]; then
+    INPUT="$PACKAGE"
+  fi
+
+  # imprime as informações detalhadas do pacote antes da instalação.
+  echo -e "\nInformações do pacote ${BLUE}$INPUT${NC}."
+  if sudo pacman -Si "$INPUT" ; then
+   sudo pacman -S "$INPUT" 
+  else
+    echo -e "${RED}Pacote não encontrado ou não pôde ser instalado.${NC}" 
+    return 1
+  fi  
+}
 
 [[ ${BLE_VERSION-} ]] && ble-attach #blesh-git 
 
