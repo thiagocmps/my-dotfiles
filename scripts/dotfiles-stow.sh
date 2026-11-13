@@ -113,7 +113,7 @@ if ! command -v opencode &> /dev/null; then
     bash -c 'curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path' && \
       mkdir -p "$HOME/.local/bin" && \
       mv "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode" && \
-      rmdir "$HOME/.opencode/bin" 2>/dev/null
+      rmdir "$HOME/.opencode/bin" 2>/dev/null || true
 
   else  
     echo -e "Opencode não foi encontrado, baixando pelo seu gestor de pacotes '$PKG_MANAGER'..."  
