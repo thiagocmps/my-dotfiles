@@ -215,7 +215,7 @@ function install_bashrc {
   fi
 
   # instala blesh caso não tenha
-  if [[ -f /usr/share/blesh/ble.sh ]]; then
+  if [[ -f /usr/share/blesh/ble.sh || -f "$HOME/.local/share/blesh/ble.sh" ]]; then
     echo -e "ble.sh está instalado e ativo!"
   elif [[ $THIS_OS_TYPE == "arch" ]]; then
     if command -v yay &>/dev/null; then
@@ -231,7 +231,25 @@ function install_bashrc {
       echo -e "${RED}ble.sh não está instalado. Instale 'blesh' manualmente e rode de novo.${NC}"
       return 1
     fi
-    $PKG_MANAGER blesh
+
+    if [[ "$THIS_OS_TYPE" =~ ^fedora ]]; then
+      echo -e "Blesh não existe em dnf, baixando manualmente..."
+      echo -e "Baixando make e gawk"
+      $PKG_MANAGER make gawk
+
+      mkdir -p "$HOME/applications"
+
+      if [[ ! -d "$HOME/applications/ble.sh" ]]; then
+        git clone --recursive --depth 1 --shallow-submodules \
+          https://github.com/akinomyoga/ble.sh.git \
+          "$HOME/applications/ble.sh"
+      fi
+      echo -e "Repositório de ble.sh clonado com sucesso em ~/applications/ble.sh." && \
+        make -C ~/applications/ble.sh install PREFIX=~/.local && \
+        echo -e "ble.sh instalado corretamente."
+    else 
+      $PKG_MANAGER blesh
+    fi
   fi
 
   # verifica se existe .bashrc, caso exista cria um backup
@@ -278,7 +296,7 @@ printf "${GREY}É necessário ter o nvim na última versão para as configuraç�
 while true; do
   printf "\n"
   read -r -p ">: " INPUT || exit 1
-   case "$INPUT" in
+  case "$INPUT" in
     0) 
       echo -e "${BOLD}Instalando tudo...${NC}"
       install_nvim && install_bashrc && install_alacritty && install_opencode && echo -e "Instalados com sucesso" 

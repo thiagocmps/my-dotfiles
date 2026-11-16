@@ -43,7 +43,7 @@ history               = 65535
 #bold                  = { family = "FantasqueSansMNerdFont Propo", style = "Bold" }
 #italic                = { family = "FantasqueSansMNerdFont Propo", style = "Italic" }
 #bold_italic           = { family = "FantasqueSansMNerdFont Propo", style = "Bold Italic" }
-size                  = 18 
+size                  = 16 
 #offset                = { x = 0, y = 0 }
 #glyph_offset          = { x = 0, y = 0 }
 #builtin_box_drawing   = true
