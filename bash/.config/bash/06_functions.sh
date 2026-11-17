@@ -16,7 +16,7 @@ vm() {
 }
 
 lis() {
-  # How it works: lis [ARG $1 = FILE or DIR to send] [ARG $2 = destiny (HARDWARE)]
+  # lis [ARG $1 = FILE or DIR to send] [ARG $2 = destiny (HARDWARE)]
   local ARGUMENT_TYPE=""
   local DESTINY="$2"
   local INPUT=""
@@ -70,7 +70,7 @@ lis() {
       echo -e "Tem certeza que quer enviar para o ${BLUE}${DESTINY}${NC}?"
     fi
 
-    # loop para guardar INPUT 
+    # loop para guardar input 
     while true; do
       read -r -p "${GREY}(y/n)${NC}: " INPUT
       case $INPUT in
@@ -98,7 +98,7 @@ lis() {
   fi
 }
 
-# script de instalacao de pacotes com pacman -S
+# script de instalacao de pacotes com pacman 
 # A ideia é mostrar todas as opções de downloads
 # relacionado ao argumento $1.
 # ao selecionar o pacote, mostra detalhes importantes
@@ -136,4 +136,4 @@ pacs() {
     return 1
   fi  
 }
-
+ 

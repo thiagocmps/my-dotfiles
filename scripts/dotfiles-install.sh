@@ -140,6 +140,23 @@ if ! command -v opencode &> /dev/null; then
   fi
 fi
 
+function install_code_templates() {
+  # Symlink é do próprio stow (o restow resolve), só faz backup de diretório real
+  if [[ -d "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -d "$CONFIG_PATH/code-templates" && ! -L "$CONFIG_PATH/code-templates" ]]; then
+    echo -e "Há uma configuração ativa. Vai ser criado ${BOLD}'code-templates-backup'${NORMAL} com as configurações antigas."
+
+    if [[ -e "$CONFIG_PATH/code-templates-backup" ]]; then
+      echo -e "Já existe um backup em $CONFIG_PATH/code-templates-backup"
+      echo -e "${RED}Abortando...${NORMAL}"
+      exit 1
+    fi
+
+    mv "$CONFIG_PATH/code-templates" "$CONFIG_PATH/code-templates-backup" && echo -e "Backup criado!" 
+  fi
+
+  stow -v --restow --target="$HOME" code-templates && echo -e "${GREEN}Configuração instalada com sucesso!${NC}"
+}
+
 function install_alacritty() {
   # Symlink é do próprio stow (o restow resolve), só faz backup de diretório real
   if [[ -d "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -d "$CONFIG_PATH/alacritty" && ! -L "$CONFIG_PATH/alacritty" ]]; then
@@ -288,6 +305,7 @@ printf "${BLUE}[1]${NC} nvim\n"
 printf "${BLUE}[2]${NC} .bashrc\n"
 printf "${BLUE}[3]${NC} opencode\n"
 printf "${BLUE}[4]${NC} alacritty\n"
+printf "${BLUE}[5]${NC} code templates\n"
 
 printf "\n"
 
@@ -299,7 +317,7 @@ while true; do
   case "$INPUT" in
     0) 
       echo -e "${BOLD}Instalando tudo...${NC}"
-      install_nvim && install_bashrc && install_alacritty && install_opencode && echo -e "Instalados com sucesso" 
+      install_nvim && install_bashrc && install_alacritty && install_opencode && install_code_templates && echo -e "Instalados com sucesso" 
       break
       ;;  
     1)
@@ -320,6 +338,11 @@ while true; do
     4)
       echo -e "${BOLD}Instalando alacritty...${NC}"
       install_alacritty
+      break
+      ;;
+    5)
+      echo -e "${BOLD}Instalando code template...${NC}"
+      install_code_templates
       break
       ;;
     *) 

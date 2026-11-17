@@ -2,8 +2,8 @@
 # ~/.bashrc
 #
 # Autor: Thiago Souza
-# Para: Uso pessoal, mas pode usar se você gostar
-# Editado em: 05/11/2026
+# Para: Uso pessoal
+# Editado em: 17/11/2026
 #
 # DEPENDÊNCIAS:
 # - bat
