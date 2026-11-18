@@ -121,13 +121,55 @@ create_express() {
 
       # muda o nome do projeto
       npm pkg set name="$PROJECT_NAME" 
-        
+
       # instala as dependências
       npm install && echo -e "Dependências instaladas com sucesso."
+
+      git add . && \
+        git commit -m "feat: Base structure." \
+
 }
 
 create_golang() {
   local PROJECT_NAME="$1"
   local PROJECT_PATH="$2"
-  echo -e "API em ${RED}Golang${NC}\n${BLUE}'$PROJECT_NAME'${NC} criado em ${BLUE}'$PROJECT_PATH'${NC}."
+  local PACKAGE_NAME="go"
+
+  # primeiro, cria a pasta do projeto
+  mkdir "${PROJECT_PATH}/${PROJECT_NAME}" && \
+    echo -e "${BLUE}${PROJECT_PATH}/${PROJECT_NAME}${NC} criado."
+
+    # muda para o diretório do projeto
+    cd "${PROJECT_PATH}/${PROJECT_NAME}" ||  {
+      echo "Erro ao aceder a pasta do projeto"
+          return 1
+    } 
+
+    # verfica se existe go e instala caso nao tenha
+    if ! command -v go &>/dev/null; then
+      if [[ "$THIS_OS_TYPE" =~ ^fedora ]]; then
+        PACKAGE_NAME="golang"
+      elif [[ "$THIS_OS_TYPE" =~ ^debian ]]; then
+        PACKAGE_NAME="golang-go"
+      fi
+      $PACKAGE_MANAGER $PACKAGE_NAME || {
+        echo -e "Erro ao instalar pacote "$PACKAGE_NAME""
+              return 1
+      }
+    fi
+
+    # Inicia repositório git
+    git init || {
+      echo -e "Falha ao iniciar repositório git."
+    }
+
+    # inicia projeto go
+    # arquivo main.go e go.mod criados aqui
+    go mod init "github.com/thiagocmps/$PROJECT_NAME" 
+
+    rsync -a "$TEMPLATE_PATH/golang/" "${PROJECT_PATH}/${PROJECT_NAME}/" && \
+      echo -e "Projeto criado com sucesso!"
+    
+    git add . && \
+      git commit -m "feat: Base structure."
 }

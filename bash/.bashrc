@@ -3,14 +3,14 @@
 #
 # Autor: Thiago Souza
 # Para: Uso pessoal
-# Editado em: 17/11/2026
+# Criado no dia 5 de julho, 2026
 #
-# DEPENDÊNCIAS:
+# Dependências:
 # - bat
 # - ripgrep
 # - fast
 # - pv
-#
+# 
 
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
@@ -20,20 +20,6 @@
 for file in "$HOME/.config/bash/"*.sh; do
     [[ -f "$file" ]] && source "$file"
 done
-
-# verifica se existe o path antes de adicionar um novo, evita duplicatas
-path_prepend() {
-  case ":$PATH:" in
-    *":$1:"*) ;;
-    *) export PATH="$1:$PATH" ;;
-  esac
-}
-
-path_prepend "$HOME/.local/bin"
-path_prepend "$HOME/.cargo/bin"
-path_prepend "$HOME/.local/share/npm-global/bin"
-path_prepend "$HOME/go/bin"
-path_prepend "$HOME/flutter-sdk/flutter/bin"
 
 #RANGER_LOAD_DEFAULT_R=false #evita que ranger sobreponha o .config local com o global
 

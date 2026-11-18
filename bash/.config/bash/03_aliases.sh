@@ -25,6 +25,7 @@ alias vim.='nvim .'
 alias vi='nvim'
 alias v.='nvim .'
 alias opencode='opencode -c'
+alias tree='tree -a -C -I ".git|node_modules|.vscode"'
 
 # pacman and yay (remove it if you dont use archlinux or any other distro arch-based)
 alias cleanup='if [ -n "$(pacman -Qtdq)" ]; then sudo pacman -Rns $(pacman -Qtdq); else echo "Nenhum pacote órfão para remover."; fi && sudo paccache -r'
