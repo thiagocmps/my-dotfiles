@@ -1,0 +1,29 @@
+# Segredos
+.env
+.env.*
+!.env.example
+
+# Dependências (reinstaladas dentro da imagem)
+node_modules
+npm-debug.log*
+
+# Build
+dist
+dist-ssr
+*.tsbuildinfo
+
+# Git / IDE
+.git
+.gitignore
+.vscode
+.idea
+
+# Testes e docs (não precisam na imagem)
+e2e
+__tests__
+coverage
+test-results
+playwright-report
+*.log
+Dockerfile
+.dockerignore
