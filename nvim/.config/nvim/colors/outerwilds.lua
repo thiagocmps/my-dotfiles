@@ -15,26 +15,26 @@ local c = {
 	void = "#000000",
 
 	-- Luz e cinza
-	starlight = "#e6e0d0", -- texto: luz da fogueira refletida em papel
-	ash = "#8d887c", -- pontuação e texto secundário (Ash Twin)
-	dust = "#6c7389", -- comentários (poeira fria)
+	starlight = "#e6e0d0", -- texto
+	ash = "#8d887c", -- pontuação e texto secundário
+	dust = "#6c7389", -- comentários
 	line_nr = "#444a5e", -- números de linha
 	guide = "#191c27", -- guias de indentação, separadores
-	select = "#1b2236", -- seleção (noite estrelada)
+	select = "#1b2236", -- seleção
 
 	-- Quentes
-	campfire = "#ff9a3c", -- keywords, fluxo de controle (Timber Hearth)
-	sunlight = "#ffd479", -- constantes, parâmetros, cursor (o Sol)
-	supernova = "#f2655b", -- strings (o fim do loop)
-	ashtwin = "#c9a27a", -- operadores (areia da Ash Twin)
+	campfire = "#ff9a3c", -- keywords, fluxo de controle
+	sunlight = "#ffd479", -- constantes, parâmetros, cursor
+	supernova = "#f2655b", -- strings
+	ashtwin = "#c9a27a", -- operadores
 
 	-- Frios
-	nomai = "#4fd8ee", -- funções (glifos Nomai brilhando)
-	giants = "#52d6a4", -- tipos (oceano do Giant's Deep)
-	hollow = "#b48cff", -- números (cristais do Brittle Hollow)
-	interloper = "#9ad0ff", -- propriedades e campos (gelo do Interloper)
-	eye = "#6f8cff", -- imports, macros, namespaces (Olho do Universo)
-	quantum = "#ff8fd0", -- escapes e caracteres especiais (Lua Quântica)
+	nomai = "#4fd8ee", -- funções
+	giants = "#52d6a4", -- tipos
+	hollow = "#b48cff", -- números
+	interloper = "#9ad0ff", -- propriedades e campos
+	eye = "#6f8cff", -- imports, macros, namespaces
+	quantum = "#ff8fd0", -- escapes e caracteres especiais
 
 	-- Estado
 	crimson = "#ff3b5c", -- erros (distinto das strings)

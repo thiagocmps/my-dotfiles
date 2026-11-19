@@ -1,3 +1,5 @@
+-- determina o formatter correto para cada linguagem
+-- Fallback: Próprio LSP
 return {
 	"stevearc/conform.nvim",
 	event = { "BufReadPre", "BufNewFile" },
@@ -12,6 +14,7 @@ return {
 			markdown = { "prettier" },
 			css = { "prettier" },
 			html = { "prettier" },
+			go = { "goimports" }, -- responsável por importar dependências automaticamente
 		},
 		format_on_save = {
 			timeout_ms = 3000,

@@ -39,6 +39,10 @@ return {
 		})
 	end,
 	settings = {
-		Lua = {},
+		Lua = {
+			hint = {
+				enable = false,
+			},
+		},
 	},
 }
